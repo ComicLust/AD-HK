@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FirmInfo {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  gsm       String
+  phone     String
+  fax       String
+  email     String
+  whatsapp  String
+  logo      String?
+  instagram String?
+  twitter   String?
+  youtube   String?
+  facebook  String?
+  linkedin  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  icon            String
+  description     String
+  fullDescription String
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  trustPoints     String?  // JSON array of strings
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TeamMember {
+  id              String     @id @default(cuid())
+  name            String
+  title           String
+  category        String     // lawyer | intern-lawyer | intern-student | staff
+  bio             String
+  initials        String
+  photo           String
+  specializations String?    // JSON array of strings
+  socialLinks     String?    // JSON string for personal email, phone, instagram, twitter, linkedin
+  slug            String     @unique
+  order           Int        @default(0)
+  isActive        Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  blogPosts       BlogPost[]
+}
+
+model BlogPost {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  summary     String
+  content     String
+  category    String
+  coverImage  String?
+  authorId    String?
+  author      TeamMember? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  publishedAt DateTime    @default(now())
+  isPublished Boolean     @default(true)
+  tags        String?     // JSON array of strings
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model BasindaBiz {
+  id           String   @id @default(cuid())
+  title        String
+  source       String
+  sourceDomain String
+  link         String
+  publishedAt  DateTime @default(now())
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Video {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  videoUrl     String
+  thumbnailUrl String?
+  publishedAt  DateTime @default(now())
+  order        Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Dilekce {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  downloadUrl String
+  fileFormat  String   // doc | pdf | docx
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SeoMeta {
+  id            String   @id @default(cuid())
+  entityType    String   // Service | BlogPost | Video | Page
+  entityId      String   // ID or Slug or PageName
+  title         String?
+  description   String?
+  canonicalUrl  String?
+  ogTitle       String?
+  ogDescription String?
+  ogImage       String?
+  keywords      String?  // JSON array of strings or comma-separated
+  robots        String?  // index, follow etc.
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+}
+
+model PageContent {
+  id        String   @id @default(cuid())
+  pageType  String   @unique // about | contact | kvkk | cookie | joinus | home
+  content   String   // JSON string of page content structure
+  updatedAt DateTime @updatedAt
+}
+
+model NavLink {
+  id        String    @id @default(cuid())
+  label     String
+  href      String
+  icon      String?
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  parentId  String?
+  parent    NavLink?  @relation("NavChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  NavLink[] @relation("NavChildren")
+  tab       String?   // For media dropdown mapping (basinda, makaleler, videolar)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model SmtpSettings {
+  id        String   @id @default("default")
+  host      String
+  port      Int
+  secure    Boolean  @default(true)
+  username  String
+  password  String
+  fromName  String
+  fromEmail String
+  updatedAt DateTime @updatedAt
+}
+
+model Translation {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  tr        String
+  en        String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MediaLibrary {
+  id        String   @id @default(cuid())
+  fileName  String
+  url       String   @unique
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
+model LocalAnalytics {
+  id        String   @id @default(cuid())
+  event     String   // "pageview" | "download" | "click"
+  path      String
+  targetId  String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model IntegrationSettings {
+  id              String   @id @default("default")
+  googleAnalytics String?  // GA4 Measurement ID: G-XXXXXXXXXX
+  searchConsole   String?  // Search Console Verification Tag
+  updatedAt       DateTime @updatedAt
+}
